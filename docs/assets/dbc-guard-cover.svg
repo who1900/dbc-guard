@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" role="img" aria-labelledby="title desc">
+  <title id="title">DBC Guard</title>
+  <desc id="desc">Understand a Meteora token launch before you trade. Eight transparent checks. No wallet required.</desc>
+  <rect width="1280" height="440" fill="#fafaf3"/>
+  <rect x="980" width="300" height="440" fill="#e9eddf"/>
+  <g fill="#1a1a1a" font-family="Arial, Helvetica, sans-serif">
+    <text x="68" y="64" font-size="15" letter-spacing="3" font-family="monospace">METEORA DBC / INDEPENDENT TOOL</text>
+    <text x="64" y="188" font-size="106" font-weight="700" letter-spacing="-7">DBC GUARD</text>
+    <text x="68" y="257" font-size="30" letter-spacing="-0.6">Understand a Meteora token launch</text>
+    <text x="68" y="297" font-size="30" letter-spacing="-0.6">before you trade.</text>
+    <text x="68" y="386" font-size="15" font-family="monospace" letter-spacing="1">ON-CHAIN EVIDENCE. NO WALLET REQUIRED.</text>
+  </g>
+  <g fill="#56614a" font-family="monospace">
+    <text x="1020" y="64" font-size="15" letter-spacing="2">READ-ONLY</text>
+    <text x="1011" y="271" font-size="146" font-weight="700" letter-spacing="-10">08</text>
+    <text x="1020" y="315" font-size="15" letter-spacing="2">LAUNCH CHECKS</text>
+    <text x="1020" y="386" font-size="15">MAINNET + DEVNET</text>
+  </g>
+</svg>
