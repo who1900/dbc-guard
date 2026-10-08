@@ -1,0 +1,3 @@
+export type Status = 'pass' | 'caution' | 'risk' | 'unknown';
+export interface Check { id: string; title: string; status: Status; summary: string; evidence: Record<string, string | number | boolean | string[]>; recommendation?: string }
+export interface Report { schemaVersion: 1; address: string; network: 'mainnet-beta' | 'devnet'; synthetic: boolean; inspectedAt: string; slot: number | null; configAddress: string; mintAddress: string; quoteMint: string; creator: string; checks: Check[]; verdict: string; coverage: number; migration: { percent: number; reserve: string; threshold: string; destination: string; status: string }; raw: unknown }

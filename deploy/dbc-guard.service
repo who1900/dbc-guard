@@ -1,0 +1,33 @@
+[Unit]
+Description=DBC Guard read-only Meteora inspector
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=dbc-guard
+Group=dbc-guard
+WorkingDirectory=/opt/dbc-guard/app
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/dbc-guard.env
+ExecStart=/opt/dbc-guard/runtime/bin/node /opt/dbc-guard/app/node_modules/tsx/dist/cli.mjs server/index.ts
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=yes
+RestrictSUIDSGID=true
+MemoryMax=384M
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dbc-guard
+
+[Install]
+WantedBy=multi-user.target

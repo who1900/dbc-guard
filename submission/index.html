@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DBC Guard — submission worksheet</title>
+<style>
+body{background:#fafaf3;color:#1a1a1a;font:18px/1.6 Arial,sans-serif;max-width:900px;margin:48px auto;padding:0 24px}h1{font-size:44px;letter-spacing:-2px}h2{font-size:22px;margin-top:40px}a{color:inherit}textarea,input{box-sizing:border-box;width:100%;font:16px/1.6 monospace;padding:16px;border:0;background:#eeeee5;color:inherit;border-radius:0}textarea{min-height:140px;resize:vertical}#description{min-height:590px}.note{padding:24px;background:#e9e9df}label{display:block;margin:24px 0 8px;font-weight:bold}button{background:#1a1a1a;color:#fafaf3;border:0;padding:10px 18px;cursor:pointer;margin:8px 0 16px}small{font-family:monospace}footer{margin:48px 0} @media(max-width:600px){body{margin:24px auto}h1{font-size:34px}#description{min-height:900px}}
+</style>
+<small>METEORA DBC / SUBMISSION WORKSHEET</small>
+<h1>DBC Guard</h1>
+<p><a href="https://dbc.whoim.space">Live application</a> · <a href="https://github.com/who1900/dbc-guard">Repository</a> · <a href="https://dbc.whoim.space/submission/dbc-guard-pitch.pdf">Pitch PDF</a> · <a href="https://dbc.whoim.space/submission/pitch.html">Browser slides</a></p>
+<aside class="note">Deadline: 13 October 2026, 06:59 UTC / 11:59 UTC+5. <a href="https://superteam.fun/earn/listing/meteora-dbc/">Official listing</a>.<br>Public rules do not explicitly require Colosseum participation; sponsor eligibility confirmation is pending. “No” does not guarantee eligibility. The <a href="https://github.com/SuperteamDAO/earn/blob/main/src/features/listings/utils/submissionFormSchema.ts">public validator</a> accepts an empty Tweet URL; live final submission has not been tested. No Tweet or video has been created. Final form submission is HUMAN_ONLY: review and submit personally.</aside>
+<label for="submission">Submission link</label><input id="submission" value="https://dbc.whoim.space" readonly>
+<label for="tweet">Tweet link (empty accepted by public validator)</label><input id="tweet" value="" placeholder="Leave blank or add a real published post">
+<label for="name">Project name</label><input id="name" value="DBC Guard" readonly>
+<label for="description">Description</label>
+<textarea id="description" readonly>DBC Guard is an independent, read-only developer tool for inspecting Meteora Dynamic Bonding Curve launches on Solana mainnet and devnet. Paste a pool address to turn its on-chain configuration into eight understandable checks, backed by expandable evidence and direct account links. No wallet connection or transaction signing is required.
+
+The checks cover mint authority, freeze authority, base-token extensions, the configured DBC trading fee ceiling, migration liquidity allocation and vesting, creator allocation and configured leftovers, curve structure and amplification, and graduation status. Meteora’s DBC SDK is central to account decoding, pool PDA validation, fee calculation and liquidity vesting math. The tool validates account ownership and layouts before interpreting configuration, and distinguishes migrated historical DBC settings from current market conditions.
+
+Reports can be downloaded as JSON or a PNG card. Share links preserve the pool address and network while requiring a fresh inspection. Missing evidence lowers coverage; RPC failures never become fabricated live results. A clearly labelled synthetic example helps users explore the interface separately from actual mainnet data.
+
+The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Transfer-hook-specific DBC layouts are explicitly unsupported. Known upstream dependency advisories are documented publicly, alongside methodology and deployment isolation. No adoption, revenue or protocol-writing traction is claimed.</textarea>
+<label for="github">GitHub repository</label><input id="github" value="https://github.com/who1900/dbc-guard" readonly>
+<label for="website">Website</label><input id="website" value="https://dbc.whoim.space" readonly>
+<label for="x">Project X account (optional)</label><input id="x" value="" placeholder="Leave blank if unavailable">
+<label for="pitch">Pitch deck / presentation</label><input id="pitch" value="https://dbc.whoim.space/submission/dbc-guard-pitch.pdf" readonly>
+<label for="colosseum">Participating in Colosseum?</label><input id="colosseum" value="No" readonly>
+<label for="colosseum-project">Link to Colosseum project (optional)</label><input id="colosseum-project" value="" placeholder="Leave blank">
+<label for="colosseum-profile">Link to your project’s Colosseum profile (optional)</label><input id="colosseum-profile" value="" placeholder="Leave blank">
+<label for="extra">Anything else?</label><textarea id="extra" readonly>Mainnet read-only inspection is live and verified; the synthetic example is explicitly labelled and never replaces a failed RPC response. DBC Guard makes no safety guarantee and does not write to Meteora or audit current DAMM positions. Coverage limitations and known upstream dependency advisories (13 affected packages: 6 high, 7 moderate on 2026-10-08) are disclosed in https://github.com/who1900/dbc-guard/blob/main/SECURITY.md and the methodology. A live deployment demonstrates execution, not user adoption or revenue.</textarea>
+<footer>No form data is transmitted by this page. Use the copy buttons, then review the official submission form yourself. Review the track-scope checkbox personally and confirm it only if its statement accurately describes this project.</footer>
+<script>
+for (const field of document.querySelectorAll('input,textarea')) {
+ const button=document.createElement('button');button.type='button';button.textContent='Copy field';
+ button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(field.value);button.textContent='Copied';}catch{field.focus();field.select();button.textContent='Selected — copy manually';}});
+ field.after(button);
+}
+</script>
+</html>

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+tmp/
+qa-*.json
+deploy/*.tar.gz
+deploy/DEPLOYMENT.md
+.superstack/
+output/pdf/*
+!output/pdf/dbc-guard-pitch.pdf
+*.log
+qa-*.png
