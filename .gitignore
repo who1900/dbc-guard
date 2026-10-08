@@ -12,5 +12,6 @@ deploy/DEPLOYMENT.md
 .superstack/
 output/pdf/*
 !output/pdf/dbc-guard-pitch.pdf
+/output/presentation/
 *.log
 qa-*.png

@@ -32,7 +32,7 @@ DBC Guard is available today on desktop and mobile, without an account or connec
 
 ## 8. Daniyar Gabdullin
 
-I am Daniyar Gabdullin, an independent product builder and the creator of Seeker Vault and DBC Guard. I build practical tools for people using Solana.
+I am Daniyar Gabdullin, a product builder working across blockchain and AI. I have been building in crypto since 2019 and created Seeker Vault and X-Booster. My background combines information-security education at Kazakh National Technical University with technical leadership experience.
 
 ## 9. Know the launch. Share the findings
 
@@ -40,10 +40,12 @@ Try DBC Guard at dbc.whoim.space. Paste a token, review the launch and share the
 
 ## Navigation and rebuilding
 
-- HTML: `public/submission/pitch.html`; scroll or use arrow keys, Page Up / Page Down, Home / End.
-- PDF: `public/submission/dbc-guard-pitch.pdf`; nine landscape pages, with clickable product and founder links.
-- Rebuild both formats: `python scripts/build-pitch.py`.
-- Build HTML only: `python scripts/build-pitch.py --html-only`.
-- Building needs Python with ReportLab (local QR generation). PDF export also needs Node.js, Playwright and Chrome. Optional environment overrides: `PITCH_NODE`, `PLAYWRIGHT_MODULE`, `PITCH_BROWSER` (Chrome executable path). The build does not add application dependencies.
-- HTML, fonts and screenshots are self-contained within `public/submission`; no external font request is needed. Keep the directory together when distributing the offline HTML.
-- Edit `scripts/pitch-template.html` for content and design, then rebuild. PDF is printed from that same HTML.
+- Editable PowerPoint: `output/presentation/dbc-guard-pitch.pptx` and `public/submission/dbc-guard-pitch.pptx`.
+- PDF exported from that actual PowerPoint file: `output/presentation/dbc-guard-pitch.pdf`, `output/pdf/dbc-guard-pitch.pdf` and `public/submission/dbc-guard-pitch.pdf`.
+- Both formats have nine uniform 16:9 pages. PowerPoint text and shapes are native and editable; genuine product screenshots are embedded images. Speaker notes are embedded per slide.
+- Rebuild both formats: `python scripts/build-pitch.py` on Windows with native Microsoft PowerPoint installed.
+- Generate only editable PowerPoint: `python scripts/build-pitch.py --pptx-only`.
+- Export native Office slide previews too: `python scripts/build-pitch.py --render-slides`.
+- Requirements: Python, Node.js, preinstalled `pptxgenjs` and `sharp`; optional environment overrides `PITCH_NODE` and `PITCH_MODULES` (directory containing those modules). No application dependencies are changed.
+- Native PowerPoint uses Arial and Courier New for dependable editing and rendering on Office installations.
+- Edit `scripts/build-pitch-pptx.cjs`, then rebuild. The canonical build no longer produces HTML or prints a webpage to PDF. Previous HTML files are legacy artifacts, not the presentation deliverable.
