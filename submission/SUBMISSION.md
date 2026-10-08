@@ -30,7 +30,7 @@ The checks cover mint authority, freeze authority, base-token extensions, the co
 
 Reports can be downloaded as JSON or a PNG card. Share links preserve the pool address and network while requiring a fresh inspection. Missing evidence lowers coverage; RPC failures never become fabricated live results. A clearly labelled synthetic example helps users explore the interface separately from actual mainnet data.
 
-The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Transfer-hook-specific DBC layouts are explicitly unsupported. Known upstream dependency advisories are documented publicly, alongside methodology and deployment isolation. No adoption, revenue or protocol-writing traction is claimed.
+The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Both current SDK account families are supported: standard and transfer-hook pools, each with its matching configuration. Future layouts are not guaranteed. Known upstream dependency advisories are documented publicly, alongside methodology and deployment isolation. No adoption, revenue or protocol-writing traction is claimed.
 
 **GitHub repository**
 

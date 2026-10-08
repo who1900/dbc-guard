@@ -85,6 +85,7 @@ def build_pdf():
     public.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(destination, public / destination.name)
     shutil.copyfile(ROOT / "submission/index.html", public / "index.html")
+    shutil.copyfile(ROOT / "submission/copy-fields.js", public / "copy-fields.js")
     sections = "".join(
         f'<section><small>{escape(label)}</small><h1>{escape(title)}</h1>'
         + "".join(f'<p>{escape(p)}</p>' for p in paragraphs)

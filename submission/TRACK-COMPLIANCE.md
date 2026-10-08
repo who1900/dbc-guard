@@ -7,8 +7,8 @@ The [public submission validator](https://github.com/SuperteamDAO/earn/blob/main
 | Criterion | DBC Guard evidence | Honest boundary |
 | --- | --- | --- |
 | Developer tooling | Read-only DBC configuration review, evidence links, JSON report, PNG card, share URL | No launchpad or transaction builder |
-| Integration depth | Meteora SDK 1.5.13 decodes pool/config, derives PDA and calculates fee/vesting values; owner/layout checks precede interpretation | Standard DBC layouts only; no current DAMM position audit |
-| Execution | Public HTTPS UI, mainnet/devnet selector, verified real mainnet report, mobile view, 14 automated tests and production build | Public RPC rate limits may affect availability |
+| Integration depth | Meteora SDK 1.5.13 decodes pool/config, derives PDA and calculates fee/vesting values; owner/layout checks precede interpretation | Current standard and transfer-hook families; future layouts not guaranteed; no current DAMM position audit |
+| Execution | Public release 1.1.0 over HTTPS, mainnet/devnet selector, six verified real mainnet pool reports, mobile view, 33 automated tests and production build | Public RPC rate limits may affect availability; point-in-time verification does not establish uptime |
 | Originality | Evidence-first review combining transparent policy thresholds, coverage and historical migration context | No claim of being the first or only comparable tool |
 | Potential impact | Makes launch parameters easier to review for launchpad developers and token users | A product hypothesis, not measured adoption |
 | Traction | Working public deployment and verified mainnet reads | No active-user, revenue or protocol-write metrics claimed |

@@ -12,7 +12,7 @@ Group=dbc-guard
 WorkingDirectory=/opt/dbc-guard/app
 Environment=NODE_ENV=production
 EnvironmentFile=/etc/dbc-guard.env
-ExecStart=/opt/dbc-guard/runtime/bin/node /opt/dbc-guard/app/node_modules/tsx/dist/cli.mjs server/index.ts
+ExecStart=/opt/dbc-guard/runtime/bin/node --no-addons --import tsx server/index.ts
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=20

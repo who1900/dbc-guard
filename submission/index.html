@@ -20,7 +20,7 @@ The checks cover mint authority, freeze authority, base-token extensions, the co
 
 Reports can be downloaded as JSON or a PNG card. Share links preserve the pool address and network while requiring a fresh inspection. Missing evidence lowers coverage; RPC failures never become fabricated live results. A clearly labelled synthetic example helps users explore the interface separately from actual mainnet data.
 
-The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Transfer-hook-specific DBC layouts are explicitly unsupported. Known upstream dependency advisories are documented publicly, alongside methodology and deployment isolation. No adoption, revenue or protocol-writing traction is claimed.</textarea>
+The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Both current SDK account families are supported: standard and transfer-hook pools, each with its matching configuration. Future layouts are not guaranteed. Known upstream dependency advisories are documented publicly, alongside methodology and deployment isolation. No adoption, revenue or protocol-writing traction is claimed.</textarea>
 <label for="github">GitHub repository</label><input id="github" value="https://github.com/who1900/dbc-guard" readonly>
 <label for="website">Website</label><input id="website" value="https://dbc.whoim.space" readonly>
 <label for="x">Project X account (optional)</label><input id="x" value="" placeholder="Leave blank if unavailable">
@@ -30,11 +30,5 @@ The hosted application has been verified against a real mainnet pool, including 
 <label for="colosseum-profile">Link to your project’s Colosseum profile (optional)</label><input id="colosseum-profile" value="" placeholder="Leave blank">
 <label for="extra">Anything else?</label><textarea id="extra" readonly>Mainnet read-only inspection is live and verified; the synthetic example is explicitly labelled and never replaces a failed RPC response. DBC Guard makes no safety guarantee and does not write to Meteora or audit current DAMM positions. Coverage limitations and known upstream dependency advisories (13 affected packages: 6 high, 7 moderate on 2026-10-08) are disclosed in https://github.com/who1900/dbc-guard/blob/main/SECURITY.md and the methodology. A live deployment demonstrates execution, not user adoption or revenue.</textarea>
 <footer>No form data is transmitted by this page. Use the copy buttons, then review the official submission form yourself. Review the track-scope checkbox personally and confirm it only if its statement accurately describes this project.</footer>
-<script>
-for (const field of document.querySelectorAll('input,textarea')) {
- const button=document.createElement('button');button.type='button';button.textContent='Copy field';
- button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(field.value);button.textContent='Copied';}catch{field.focus();field.select();button.textContent='Selected — copy manually';}});
- field.after(button);
-}
-</script>
+<script src="./copy-fields.js"></script>
 </html>
