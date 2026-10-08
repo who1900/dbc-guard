@@ -4,8 +4,9 @@ import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { readReport, validateAddress, InvalidAccountError, RpcTransportError } from './reader.js';
 import { inspectInput, InputResolutionError } from './resolve.js';
+import { readTokenInfo, unavailableTokenInfo, type TokenInfo } from './token-info.js';
 
-interface Options { readReport?: typeof readReport; inspectInput?: typeof inspectInput; now?: () => number; deadlineMs?: number; rateLimit?: number; maxBuckets?: number; maxActive?: number }
+interface Options { readReport?: typeof readReport; inspectInput?: typeof inspectInput; readTokenInfo?: typeof readTokenInfo; tokenInfoDeadlineMs?: number; now?: () => number; deadlineMs?: number; rateLimit?: number; maxBuckets?: number; maxActive?: number }
 export function createApp(options: Options = {}) {
 const reader = options.inspectInput ?? (options.readReport ? options.readReport : inspectInput);
 const clock = options.now ?? Date.now;
@@ -18,7 +19,35 @@ const windows = new Map<string, { start: number; count: number }>();
 const cache = new Map<string, { at: number; report: Awaited<ReturnType<typeof readReport>> }>();
 const pending = new Map<string, { promise: Promise<Awaited<ReturnType<typeof readReport>>>; controller: AbortController; subscribers: number }>();
 let active = 0;
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', release: '1.2.0', sdk: '1.5.13' }));
+let metadataActive = 0;
+const metadataCache = new Map<string, { at: number; info: TokenInfo }>();
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', release: '1.3.0', sdk: '1.5.13' }));
+app.get('/api/token-info', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const now = clock(); const ip = `metadata:${req.ip || 'local'}`;
+  for (const [key, window] of windows) if (now - window.start >= 60000) windows.delete(key);
+  if (!windows.has(ip) && windows.size >= (options.maxBuckets ?? 5000)) { res.set('Retry-After', '60').status(429).json({ error: 'Metadata capacity reached. Retry shortly.' }); return; }
+  const window = windows.get(ip) ?? { start: now, count: 0 }; window.count++; windows.set(ip, window);
+  if (window.count > (options.rateLimit ?? 20)) { res.set('Retry-After', '60').status(429).json({ error: 'Too many requests. Retry shortly.' }); return; }
+  let address: string;
+  try { address = validateAddress(req.query.address); } catch { res.status(400).json({ error: 'Enter a valid token mint address.', code: 'INVALID_ADDRESS' }); return; }
+  if (req.query.network !== 'mainnet-beta' && req.query.network !== 'devnet') { res.status(400).json({ error: 'Select mainnet-beta or devnet.', code: 'INVALID_NETWORK' }); return; }
+  const network = req.query.network; const key = `${network}:${address}`; const missing = unavailableTokenInfo(address, network);
+  const cached = metadataCache.get(key); if (cached && now - cached.at < 60000) { res.json(cached.info); return; }
+  if (metadataActive >= 4) { res.json(missing); return; }
+  metadataActive++;
+  const controller = new AbortController(); const onClose = () => controller.abort(); res.once('close', onClose);
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<TokenInfo>(resolve => { timer = setTimeout(() => { controller.abort(); resolve(missing); }, options.tokenInfoDeadlineMs ?? 5000); timer.unref(); });
+  const work = Promise.resolve().then(() => (options.readTokenInfo ?? readTokenInfo)(address, network, { signal: controller.signal }));
+  const settled = () => { metadataActive--; clearTimeout(timer); };
+  void work.then(settled, settled);
+  try {
+    const info = await Promise.race([work, timeout]).catch(() => missing);
+    if (!controller.signal.aborted) { if (metadataCache.size >= 200) metadataCache.delete(metadataCache.keys().next().value!); metadataCache.set(key, { at: clock(), info }); }
+    if (!res.destroyed) res.json(info);
+  } finally { res.off('close', onClose); controller.abort(); }
+});
 app.get('/api/inspect', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const key = req.ip || 'local'; const now = clock();

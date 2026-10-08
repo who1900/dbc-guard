@@ -62,6 +62,8 @@ Pitch: **Inspect a Meteora launch before your first trade.** DBC Guard makes lau
 
 Copy-ready fields, presentation and recording script: [submission/SUBMISSION.md](submission/SUBMISSION.md). Program: `dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN`.
 
+Real, timestamped launch-condition demonstrations: [two case studies](submission/CASE-STUDIES.md). Proposed research, recruitment draft and launchpad-link pilot: [user validation protocol](submission/USER-VALIDATION.md). These are examples and plans, not customer adoption or completed interviews.
+
 [Pitch PDF](https://dbc.whoim.space/submission/dbc-guard-pitch.pdf) · [Known audit findings](audit/AUDIT-2026-10-08.md).
 
 ## Limitations
@@ -80,3 +82,13 @@ A preliminary decode sample covered 100 pool accounts, 66 configurations and eig
 
 - Public release 1.2.0 is verified: HTTPS health confirms the version; real SPL, Token-2022 and transfer-hook mint inputs resolve to validated reports with 8 checks and 100% available-check coverage. Shared authority/program input receives correct guidance without Retry.
 - Public Chrome verified provenance JSON, PNG download, canonical pool sharing, mobile 390px, worksheet copy and the unchanged pitch PDF, with zero JavaScript errors. Original Nginx checksums and neighboring project responses remained unchanged.
+
+## Release 1.3.0 — usability and verification
+
+Release 1.3.0 brings the main findings above individual checks, replaces the prominent coverage percentage with completed-check counts, and distinguishes launch settings from unverified current post-migration conditions. Shared URLs start a fresh inspection automatically. Supported Solscan token/account links resolve to an address; unsupported DEX pair links receive guidance rather than being silently interpreted as a token. Recent successful live inspections are stored locally with a clear-history action; synthetic examples are excluded.
+
+Optional token names and symbols are loaded separately through `GET /api/token-info?address=MINT&network=mainnet-beta` (or `devnet`). Labels are issuer-supplied and do not verify token identity. Unavailable metadata never replaces or blocks the core report. The server checks mint and metadata ownership, canonical Metaplex PDA, discriminator, mint binding, bounded structure and UTF-8; it never fetches issuer-provided URIs. This endpoint has a five-second deadline, four concurrent jobs, per-client rate limits and a 200-entry/60-second cache.
+
+The main reviewer independently verified 93/93 local tests, the normal production build and a production dependency audit with zero known advisories. Chrome QA with real public RPC data covered standard SPL and Token-2022 transfer-hook inputs, optional names/symbols, shared-link auto-inspection, supported input links, recent history, JSON/PNG downloads and evidence expansion. Tested 375, 768 and 1440 px viewports had no horizontal overflow or JavaScript errors; tested interactive targets were at least 44 px high. Linux staging installed 155 production packages with zero known advisories and returned eight-check reports for the reference and transfer-hook pools.
+
+Public HTTPS health confirmed release 1.3.0. Independent public Chrome QA verified both reference and transfer-hook reports, issuer-supplied names/symbols, automatic shared-link inspection, Solscan mint links, priority findings, historical scope and submission-field copying. Mobile 390 px and desktop 1440 px had no horizontal overflow or JavaScript errors. These are point-in-time checks, not adoption, token safety, universal pool support or an uptime guarantee. See [VERIFICATION.md](VERIFICATION.md) for the release record.

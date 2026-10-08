@@ -24,13 +24,13 @@ DBC Guard
 
 **Description**
 
-DBC Guard is an independent, read-only developer tool for inspecting Meteora Dynamic Bonding Curve launches on Solana mainnet and devnet. Paste a pool or token mint address to turn its on-chain configuration into eight understandable checks, backed by expandable evidence and direct account links. No wallet connection or transaction signing is required.
+DBC Guard helps people understand Meteora token launches before they trade. Paste a pool or token address to review eight clear checks covering token controls, trading fees, creator allocations, liquidity arrangements and launch progress. Buyers can investigate unfamiliar launch terms; creators can share the same evidence with their communities.
 
-The checks cover mint authority, freeze authority, base-token extensions, the configured DBC trading fee ceiling, migration liquidity allocation and vesting, creator allocation and configured leftovers, curve structure and amplification, and graduation status. Meteora’s DBC SDK is central to account decoding, pool PDA validation, fee calculation and liquidity vesting math. The tool validates account ownership and layouts before interpreting configuration, and distinguishes migrated historical DBC settings from current market conditions.
+Each finding includes supporting evidence and links to the underlying accounts. Explore a report, share its link or download the results without connecting a wallet. Meteora’s DBC SDK powers the interpretation of launch conditions, including fee and liquidity-vesting calculations.
 
-Reports can be downloaded as JSON or a PNG card. Share links preserve the pool address and network while requiring a fresh inspection. Missing evidence lowers coverage; RPC failures never become fabricated live results. A clearly labelled synthetic example helps users explore the interface separately from actual mainnet data.
+The product is live on desktop and mobile. Its inspection engine has been validated against a sample of 100 real Meteora DBC pools on Solana mainnet; this is product-validation evidence, not a count of users.
 
-The hosted application has been verified against a real mainnet pool, including a live eight-check report. It is intended to help launchpad developers and token users review configuration before deeper investigation. It does not certify safety, audit holder identities, inspect live post-migration DAMM positions, or repair immutable configurations. Both current SDK account families are supported: standard and transfer-hook pools, each with its matching configuration. Future layouts are not guaranteed. Dependency remediation, compatibility checks, methodology and deployment isolation are documented publicly. No adoption, revenue or protocol-writing traction is claimed.
+DBC Guard explains launch conditions, not investment safety. For migrated launches, those settings are historical and do not verify current DAMM positions, fees or holder concentration.
 
 **GitHub repository**
 
@@ -48,6 +48,8 @@ Leave blank.
 
 https://dbc.whoim.space/submission/dbc-guard-pitch.pdf
 
+Editable PowerPoint, if an additional link is useful: https://dbc.whoim.space/submission/dbc-guard-pitch.pptx
+
 **Participating in Colosseum?**
 
 No
@@ -62,7 +64,15 @@ Leave blank.
 
 **Anything else?**
 
-Mainnet read-only inspection is live and verified; the synthetic example is explicitly labelled and never replaces a failed RPC response. DBC Guard makes no safety guarantee and does not write to Meteora or audit current DAMM positions. Release 1.2.0 uses an independent pure-JavaScript bigint codec and targeted dependency upgrades; current full and production npm audit report zero known advisories. Compatibility limits and verification boundaries are disclosed in https://github.com/who1900/dbc-guard/blob/main/SECURITY.md and the methodology. A live deployment demonstrates execution, not user adoption or revenue.
+Try the live product: https://dbc.whoim.space
+
+Pitch deck: https://dbc.whoim.space/submission/dbc-guard-pitch.pdf
+
+Editable PowerPoint: https://dbc.whoim.space/submission/dbc-guard-pitch.pptx
+
+Two real, timestamped launch-condition examples: https://github.com/who1900/dbc-guard/blob/main/submission/CASE-STUDIES.md
+
+The product is read-only and does not require a wallet. It provides launch transparency, not a guarantee of token safety. User interviews and a launchpad pilot are proposed next steps, not existing traction.
 
 ## User checklist
 
@@ -71,3 +81,4 @@ Mainnet read-only inspection is live and verified; the synthetic example is expl
 - Optionally record the actual demo using DEMO-SCRIPT.md.
 - Review every field, then submit personally through Superteam.
 - Review the track-scope checkbox yourself and confirm it only if its statement accurately describes this project.
+- Keep customer/pilot claims blank until real research is conducted; the research plan is in USER-VALIDATION.md.
