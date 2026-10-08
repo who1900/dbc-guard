@@ -10,6 +10,6 @@ Record the actual browser and your voice. No video is included or claimed.
 | 35–55s | Expand fee and LP checks | “Each finding includes evidence. In the verified snapshot, the configuration allocated 89% liquid LP and 11% vesting. The historical DBC fee ceiling was 25 basis points. Read the live values shown now if they differ.” |
 | 55–68s | Show migration and coverage | “This pool is already migrated; its approximately 11.53 SOL reserve is historical DBC evidence. We do not claim these are current DAMM balances or fees. Missing evidence reduces coverage.” |
 | 68–80s | Download JSON and PNG; show share link | “Export a report or share the pool for a fresh inspection. A no-flag result is never a safety certificate.” |
-| 80–90s | Show methodology/security links | “The source documents both supported account families, review boundaries and outstanding dependency advisories. Try the deployed tool at dbc.whoim.space.” |
+| 80–90s | Show methodology/security links | “The source documents both supported account families, review boundaries and dependency compatibility checks. Try the deployed tool at dbc.whoim.space.” |
 
 If an RPC is unavailable during recording, show the actual error and retry later. Do not present a synthetic report as a live response. Never imply an address is endorsed by Meteora.

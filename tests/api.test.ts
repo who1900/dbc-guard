@@ -3,11 +3,28 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import { createApp } from '../server/index.js';
-import { InvalidAccountError } from '../server/reader.js';
+import { InvalidAccountError, RpcTransportError } from '../server/reader.js';
+import { InputResolutionError } from '../server/resolve.js';
 import { demo } from '../src/demo.js';
 
 const address = '8f6Zje37mKD3q1F46RqSo3thrPsScRQ9XLGNcsxzNSQW';
 const route = `/api/inspect?address=${address}&network=mainnet-beta`;
+test('API input guidance and multiple-pool selection preserve typed error semantics', async () => {
+  await serve({ inspectInput: async () => { throw new InputResolutionError('Shared authority; paste a pool or token.', 'SHARED_AUTHORITY'); } }, async base => { const result = await fetch(base + route); assert.equal(result.status, 422); const body = await result.json(); assert.equal(body.code, 'SHARED_AUTHORITY'); assert.equal(body.retryable, false); });
+  await serve({ inspectInput: async () => { throw new InputResolutionError('Choose a pool.', 'MULTIPLE_POOLS', 409, [address]); } }, async base => { const result = await fetch(base + route); assert.equal(result.status, 409); const body = await result.json(); assert.deepEqual(body.candidates, [address]); assert.equal(body.retryable, false); });
+});
+test('temporary discovery provider failure offers retry without treating invalid input as transient', async () => {
+  await serve({ inspectInput: async () => { throw new InputResolutionError('Lookup temporarily unavailable; retry or paste the pool.', 'DISCOVERY_UNAVAILABLE', 503); } }, async base => {
+    const response = await fetch(base + route); assert.equal(response.status, 503);
+    const body = await response.json(); assert.equal(body.code, 'DISCOVERY_UNAVAILABLE'); assert.equal(body.retryable, true);
+  });
+});
+test('upstream rate limit preserves429, bounded Retry-After and provider-safe guidance', async () => {
+  await serve({ inspectInput: async () => { throw new RpcTransportError('private-provider-token', true, 429, 7); } }, async base => {
+    const response = await fetch(base + route); assert.equal(response.status, 429); assert.equal(response.headers.get('retry-after'), '7');
+    const body = await response.json(); assert.equal(body.code, 'RPC_BUSY'); assert.equal(body.retryable, true); assert.equal(body.error, 'Solana RPC is busy. Retry shortly.'); assert.ok(!JSON.stringify(body).includes('private-provider-token'));
+  });
+});
 async function serve(options: Parameters<typeof createApp>[0], run: (base: string) => Promise<void>) {
   const server = createApp(options).listen(0, '127.0.0.1'); await once(server, 'listening');
   try { await run(`http://127.0.0.1:${(server.address() as AddressInfo).port}`); }

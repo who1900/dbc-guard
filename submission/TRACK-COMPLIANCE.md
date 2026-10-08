@@ -8,10 +8,10 @@ The [public submission validator](https://github.com/SuperteamDAO/earn/blob/main
 | --- | --- | --- |
 | Developer tooling | Read-only DBC configuration review, evidence links, JSON report, PNG card, share URL | No launchpad or transaction builder |
 | Integration depth | Meteora SDK 1.5.13 decodes pool/config, derives PDA and calculates fee/vesting values; owner/layout checks precede interpretation | Current standard and transfer-hook families; future layouts not guaranteed; no current DAMM position audit |
-| Execution | Public release 1.1.0 over HTTPS, mainnet/devnet selector, six verified real mainnet pool reports, mobile view, 33 automated tests and production build | Public RPC rate limits may affect availability; point-in-time verification does not establish uptime |
+| Execution | Public HTTPS product, mainnet/devnet selector, mobile view, 76 automated tests and production build; final 1.2.0 runtime fully inspected 100 unique real mainnet pools; token discovery verified separately | Public RPC rate limits may affect availability; sampled results do not establish universal pool support or uptime |
 | Originality | Evidence-first review combining transparent policy thresholds, coverage and historical migration context | No claim of being the first or only comparable tool |
 | Potential impact | Makes launch parameters easier to review for launchpad developers and token users | A product hypothesis, not measured adoption |
 | Traction | Working public deployment and verified mainnet reads | No active-user, revenue or protocol-write metrics claimed |
-| Security | Non-root isolated service, bounded RPC data, fixed RPC endpoints, no wallets/signatures; public methodology and SECURITY.md | 13 affected dependency packages remain: 6 high, 7 moderate; no clean-audit claim |
+| Security | Non-root isolated service, bounded RPC data, fixed RPC endpoints, no wallets/signatures; local pure-JS bigint replacement and targeted dependency upgrades | Current full/production npm audit report zero known advisories; local code compatibility and RPC trust still require review; no security certification |
 
 The public repository exists at https://github.com/who1900/dbc-guard; no open-source license is asserted without the user's explicit license choice. Submission remains a user-reviewed action; no Tweet or video exists merely because this package exists.

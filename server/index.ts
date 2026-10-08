@@ -2,11 +2,12 @@ import express from 'express';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { readReport, validateAddress, InvalidAccountError } from './reader.js';
+import { readReport, validateAddress, InvalidAccountError, RpcTransportError } from './reader.js';
+import { inspectInput, InputResolutionError } from './resolve.js';
 
-interface Options { readReport?: typeof readReport; now?: () => number; deadlineMs?: number; rateLimit?: number; maxBuckets?: number; maxActive?: number }
+interface Options { readReport?: typeof readReport; inspectInput?: typeof inspectInput; now?: () => number; deadlineMs?: number; rateLimit?: number; maxBuckets?: number; maxActive?: number }
 export function createApp(options: Options = {}) {
-const reader = options.readReport ?? readReport;
+const reader = options.inspectInput ?? (options.readReport ? options.readReport : inspectInput);
 const clock = options.now ?? Date.now;
 const app = express();
 app.disable('x-powered-by');
@@ -17,7 +18,7 @@ const windows = new Map<string, { start: number; count: number }>();
 const cache = new Map<string, { at: number; report: Awaited<ReturnType<typeof readReport>> }>();
 const pending = new Map<string, { promise: Promise<Awaited<ReturnType<typeof readReport>>>; controller: AbortController; subscribers: number }>();
 let active = 0;
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', release: '1.1.0', sdk: '1.5.13' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', release: '1.2.0', sdk: '1.5.13' }));
 app.get('/api/inspect', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const key = req.ip || 'local'; const now = clock();
@@ -26,8 +27,8 @@ app.get('/api/inspect', async (req, res) => {
   const window = windows.get(key) ?? { start: now, count: 0 }; if (now - window.start > 60000) { window.start = now; window.count = 0; } window.count++; windows.set(key, window);
   if (window.count > (options.rateLimit ?? 20)) { res.set('Retry-After', '60').status(429).json({ error: 'Too many requests. Please retry in one minute.' }); return; }
   let address: string;
-  try { address = validateAddress(req.query.address); } catch (e) { res.status(400).json({ error: (e as Error).message }); return; }
-  if (req.query.network !== 'mainnet-beta' && req.query.network !== 'devnet') { res.status(400).json({ error: 'Select mainnet-beta or devnet.' }); return; }
+  try { address = validateAddress(req.query.address); } catch { res.status(400).json({ error: 'Enter a valid Solana DBC pool or token mint address.', code: 'INVALID_ADDRESS', retryable: false }); return; }
+  if (req.query.network !== 'mainnet-beta' && req.query.network !== 'devnet') { res.status(400).json({ error: 'Select mainnet-beta or devnet.', code: 'INVALID_NETWORK', retryable: false }); return; }
   const network = req.query.network; const cacheKey = `${network}:${address}`; const cached = cache.get(cacheKey);
   if (cached && now - cached.at < 20000) { res.json(cached.report); return; }
   let job = pending.get(cacheKey);
@@ -49,7 +50,12 @@ app.get('/api/inspect', async (req, res) => {
   const release = () => { if (released) return; released = true; subscription.subscribers--; if (subscription.subscribers === 0 && pending.get(cacheKey) === subscription) subscription.controller.abort(); };
   res.once('close', release);
   try { const report = await subscription.promise; if (!res.destroyed) res.json(report); }
-  catch (e) { if (!res.destroyed) { const known = e instanceof InvalidAccountError; res.status(known ? 422 : 502).json({ error: known ? e.message : 'RPC could not complete the inspection. Retry shortly or configure a dedicated server RPC endpoint.' }); } }
+  catch (e) { if (!res.destroyed) {
+    const known = e instanceof InvalidAccountError; const input = e instanceof InputResolutionError;
+    const busy = e instanceof RpcTransportError && e.status === 429;
+    if (busy) res.set('Retry-After', String(Math.max(1, Math.min(120, Math.ceil(e.retryAfter ?? 5)))));
+    res.status(busy ? 429 : input ? e.status : known ? 422 : 502).json({ error: busy ? 'Solana RPC is busy. Retry shortly.' : input || known ? e.message : 'RPC could not complete the inspection. Retry shortly or configure a dedicated server RPC endpoint.', code: busy ? 'RPC_BUSY' : input ? e.code : known ? 'INVALID_ACCOUNT' : 'RPC_UNAVAILABLE', retryable: input ? e.status >= 500 : !known, ...(input && e.candidates ? { candidates: e.candidates } : {}) });
+  } }
   finally { res.off('close', release); release(); }
 });
 app.use('/api', (_req, res) => res.status(404).json({ error: 'API route not found.' }));

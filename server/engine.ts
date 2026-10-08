@@ -7,12 +7,14 @@ export function summarize(checks: Check[]) { return { coverage: Math.round(check
 export function formatAmount(raw: string, decimals: number) { const padded = raw.padStart(decimals + 1, '0'); return decimals ? `${padded.slice(0, -decimals)}.${padded.slice(-decimals).replace(/0+$/, '') || '0'}` : raw; }
 export function inspect(config: PoolConfig, pool: VirtualPool['poolState'], mint: MintEvidence | null, quoteDecimals: number | null): { checks: Check[]; migration: Report['migration'] } {
   const checks: Check[] = [];
+  const assess = (id: string, title: string, evaluate: () => void) => { try { evaluate(); } catch { checks.push({ id, title, status: 'unknown', summary: 'This configuration could not be assessed with the current SDK math; other checks remain available.', evidence: { reason: 'Unsupported or out-of-range configuration values' } }); } };
   const authority = deriveDbcPoolAuthority().toBase58();
   checks.push({ id: 'mint', title: 'Mint authority', status: !mint ? 'unknown' : mint.mintAuthority === null ? 'pass' : mint.mintAuthority === authority ? 'caution' : 'risk', summary: !mint ? 'Mint account could not be read.' : mint.mintAuthority === null ? 'Additional minting is disabled.' : mint.mintAuthority === authority ? 'DBC program controls minting. This may be expected before migration.' : 'An authority can mint additional tokens.', evidence: { authority: mint?.mintAuthority ?? (mint ? 'None' : 'Unknown'), dbcAuthority: authority, configuredAuthorityMode: config.tokenUpdateAuthority }, recommendation: mint?.mintAuthority ? 'Verify the authority and configured token lifecycle before trading.' : undefined });
   checks.push({ id: 'freeze', title: 'Freeze authority', status: !mint ? 'unknown' : mint.freezeAuthority ? 'risk' : 'pass', summary: !mint ? 'Freeze capability is unknown.' : mint.freezeAuthority ? 'Token accounts can be frozen by this authority.' : 'No freeze authority is present.', evidence: { authority: mint?.freezeAuthority ?? (mint ? 'None' : 'Unknown') } });
   const sensitive = mint?.extensions.filter(x => /TransferFee|TransferHook|PermanentDelegate|NonTransferable|DefaultAccountState|Confidential|Pausable|PermissionedBurn|MintCloseAuthority|ScaledUiAmount|InterestBearing/i.test(x)) ?? [];
   const extensionUnknown = !mint || !mint.extensionReadComplete || mint.extensions.some(x => x.startsWith('Unknown'));
   checks.push({ id: 'extensions', title: 'Base token extensions', status: extensionUnknown ? 'unknown' : sensitive.length ? 'caution' : 'pass', summary: extensionUnknown ? 'Unsupported, missing or malformed extension data; token policy is unknown.' : sensitive.length ? 'Extensions may change transfer cost, permissions or availability; parameters require independent review.' : 'No policy-sensitive base-token extensions detected.', evidence: { extensions: mint?.extensions ?? [], extensionReadComplete: mint?.extensionReadComplete ?? false, sensitiveExtensions: sensitive, quoteTokenPolicy: 'Not assessed' } });
+  assess('fees', 'DBC trading fee ceiling', () => {
   const base = config.poolFees.baseFee;
   if (![0, 1, 2].includes(base.baseFeeMode)) checks.push({ id: 'fees', title: 'Maximum configured trading fee', status: 'unknown', summary: 'Unsupported base fee mode.', evidence: { mode: base.baseFeeMode } });
   else {
@@ -20,9 +22,11 @@ export function inspect(config: PoolConfig, pool: VirtualPool['poolState'], mint
     const maxBase = rateLimited ? new BN(MAX_FEE_NUMERATOR) : base.cliffFeeNumerator;
     const dynamic = config.poolFees.dynamicFee;
     const maxTotal = getTotalFeeNumerator(maxBase, dynamic, { volatilityAccumulator: new BN(dynamic.maxVolatilityAccumulator) } as Parameters<typeof getTotalFeeNumerator>[2]);
-    const bps = maxTotal.muln(10000).div(new BN(1_000_000_000)).toNumber();
+    const bps = maxTotal.toNumber() / 100000;
     checks.push({ id: 'fees', title: 'DBC trading fee ceiling', status: bps > 1000 ? 'risk' : bps > 300 ? 'caution' : 'pass', summary: `Configured upper bound ${(bps / 100).toFixed(2)}%. ${pool.isMigrated ? 'Historical launch configuration; current DAMM fees are not inspected.' : 'This is not a quote for your trade.'}`, evidence: { maxBps: bps, baseMode: ['Linear scheduler', 'Exponential scheduler', 'Rate limiter'][base.baseFeeMode], dynamicFeeEnabled: dynamic.initialized !== 0, creatorTradingFeeSharePercent: config.creatorTradingFeePercentage, migrationFeePercent: config.migrationFeePercentage, configuredMigratedPoolFeeBps: config.migratedPoolFeeBps }, recommendation: bps > 300 ? 'Compare the upper bound with the live swap quote and consider waiting for fee decay.' : undefined });
   }
+  });
+  assess('liquidity', 'Migration liquidity allocation', () => {
   const permanent = config.partnerPermanentLockedLiquidityPercentage + config.creatorPermanentLockedLiquidityPercentage;
   const vested = config.partnerLiquidityVestingInfo.vestingPercentage + config.creatorLiquidityVestingInfo.vestingPercentage;
   const liquidBuckets = config.partnerLiquidityPercentage + config.creatorLiquidityPercentage;
@@ -30,6 +34,8 @@ export function inspect(config: PoolConfig, pool: VirtualPool['poolState'], mint
   const unlocked = 100 - calculateLockedLiquidityBpsAtTime(config.partnerPermanentLockedLiquidityPercentage, config.creatorPermanentLockedLiquidityPercentage, config.partnerLiquidityVestingInfo, config.creatorLiquidityVestingInfo, 0) / 100;
   const day1 = calculateLockedLiquidityBpsAtTime(config.partnerPermanentLockedLiquidityPercentage, config.creatorPermanentLockedLiquidityPercentage, config.partnerLiquidityVestingInfo, config.creatorLiquidityVestingInfo, 86400) / 100;
   checks.push({ id: 'liquidity', title: 'Migration liquidity allocation', status: total !== 100 ? 'unknown' : unlocked > 50.02 ? 'risk' : unlocked > 0.02 || day1 < 49.98 ? 'caution' : 'pass', summary: total !== 100 ? 'LP allocation does not sum to 100%; interpretation incomplete.' : `${permanent}% permanently locked · ${vested}% vesting allocation · ${liquidBuckets}% configured liquid allocation. SDK estimates ${unlocked.toFixed(2)}% unlocked at migration. ${pool.isMigrated ? 'Current DAMM positions are not inspected.' : ''}`, evidence: { permanentPercent: permanent, vestingPercent: vested, configuredLiquidAllocationPercent: liquidBuckets, unlockedPercent: unlocked, lockedAfterOneDayPercent: day1, timeBasedValueMeaning: 'Rounded SDK estimates; flag thresholds allow 0.02 percentage points for two vesting buckets', allocationTotal: total, creatorUnlockedPercent: config.creatorLiquidityPercentage, partnerUnlockedPercent: config.partnerLiquidityPercentage }, recommendation: unlocked > 0.02 ? 'Unlocked LP can be withdrawn after migration; inspect the recipients and vesting schedules.' : undefined });
+  });
+  assess('allocation', 'Creator token allocation & leftovers', () => {
   const v = config.lockedVestingConfig;
   const vestingAmount = v.amountPerPeriod.mul(v.numberOfPeriod).add(v.cliffUnlockAmount);
   const lifecycleAmount = config.swapBaseAmount.add(config.migrationBaseThreshold).add(vestingAmount);
@@ -40,12 +46,15 @@ export function inspect(config: PoolConfig, pool: VirtualPool['poolState'], mint
   const vestingDisplay = percent === 0 && vestingAmount.gtn(0) ? '<0.01' : String(percent);
   const leftoverDisplay = leftoverPercent === 0 && leftover.gtn(0) ? '<0.01' : String(leftoverPercent);
   checks.push({ id: 'allocation', title: 'Creator token allocation & leftovers', status: percent === null || (config.fixedTokenSupplyFlag !== 0 && lifecycleAmount.gt(supply)) ? 'unknown' : percent > 20 || leftover.gtn(0) ? 'caution' : 'pass', summary: percent === null ? 'Configured supply is unavailable; allocation ratio unknown.' : `${vestingDisplay}% of configured lifecycle supply is reserved for creator vesting. ${leftover.gtn(0) ? `Configured leftover estimate ${leftoverDisplay}% assigned to leftover receiver; actual claimable amount is not verified.` : ''} This is not a holdings analysis.`, evidence: { creatorVestingRaw: vestingAmount.toString(), configuredSupplyRaw: supply.toString(), configuredLeftoverEstimateRaw: leftover.toString(), configuredLeftoverEstimatePercent: leftoverPercent ?? 'Unknown', leftoverEstimateMeaning: 'Configured supply minus curve, migration and vesting allocations; not current claimable vault balance', cliffUnlockRaw: v.cliffUnlockAmount.toString(), vestingFrequencySeconds: v.frequency.toString(), periods: v.numberOfPeriod.toString(), cliffDelaySeconds: v.cliffDurationFromMigrationTime.toString(), leftoverReceiver: config.leftoverReceiver.toBase58(), fixedSupply: config.fixedTokenSupplyFlag !== 0 }, recommendation: 'Review creator vesting and leftover recipient. Holder concentration and linked wallets are outside this assessment.' });
+  });
+  assess('curve', 'Curve structure & price amplification', () => {
   const active: typeof config.curve = [];
   for (const point of config.curve) { if (point.sqrtPrice.isZero() || point.liquidity.isZero()) break; active.push(point); }
   let previous = config.sqrtStartPrice;
   const valid = active.length > 0 && active.every(p => { const increasing = p.sqrtPrice.gt(previous) && p.liquidity.gtn(0); previous = p.sqrtPrice; return increasing; });
   const amplification = active.length && !config.sqrtStartPrice.isZero() ? (Number(config.migrationSqrtPrice.toString()) / Number(config.sqrtStartPrice.toString())) ** 2 : null;
   checks.push({ id: 'curve', title: 'Curve structure & price amplification', status: !valid ? 'risk' : amplification !== null && amplification > 100 ? 'caution' : 'pass', summary: !valid ? 'Active curve boundaries are not strictly increasing.' : `${active.length} active segments; endpoint/start price ratio ${amplification?.toFixed(2)}×. High amplification is a sensitivity heuristic, not a discontinuity.`, evidence: { activeSegments: active.length, monotonic: valid, amplification: amplification === null ? 'Unknown' : amplification.toFixed(4), segmentLiquidityRaw: active.map(p => p.liquidity.toString()), sqrtStartPriceRaw: config.sqrtStartPrice.toString(), sqrtEndPricesRaw: active.map(p => p.sqrtPrice.toString()) } });
+  });
   const threshold = config.migrationQuoteThreshold;
   const percentProgress = threshold.isZero() ? 0 : pool.quoteReserve.gte(threshold) ? 100 : pool.quoteReserve.muln(10000).div(threshold).toNumber() / 100;
   const destination = config.migrationOption === 0 ? 'DAMM v1' : config.migrationOption === 1 ? 'DAMM v2' : 'Unknown';

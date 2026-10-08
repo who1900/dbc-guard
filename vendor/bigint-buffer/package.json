@@ -1,0 +1,1 @@
+{"name":"@dbc-guard/bigint-buffer-purejs","version":"1.0.0","private":true,"description":"Independent, bounded pure-JavaScript implementation of the four bigint-buffer APIs used by Solana layouts; no native bindings.","main":"index.cjs","types":"index.d.ts","engines":{"node":">=22"}}

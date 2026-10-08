@@ -1,6 +1,13 @@
 import type { Report } from './types';
 
 export const REAL_POOL = '8f6Zje37mKD3q1F46RqSo3thrPsScRQ9XLGNcsxzNSQW';
+export const HOOK_POOL = 'BPsd85Aa4RZors38wanFbZauijj62Tfgx6VTtobzBqL8';
+export function inspectionFailure(body: { error?: string; retryable?: boolean; candidates?: string[] }, status: number) {
+  return { message: body.error || 'Inspection failed.', retryable: body.retryable ?? (status === 429 || status >= 500), candidates: Array.isArray(body.candidates) ? body.candidates.filter(address => typeof address === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)).slice(0, 8) : [] };
+}
+export function matchesInspection(report: Report, input: string, network: Report['network']) {
+  return (report.inputAddress ?? report.address) === input && report.network === network && report.synthetic === false;
+}
 export function statusCounts(report: Report) {
   return { risk: report.checks.filter(c => c.status === 'risk').length, caution: report.checks.filter(c => c.status === 'caution').length, unknown: report.checks.filter(c => c.status === 'unknown').length };
 }
